@@ -1,4 +1,3 @@
-
 package com.trustserve;
 
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +54,7 @@ public class Security {
         CookieCsrfTokenRepository repository =
             CookieCsrfTokenRepository.withHttpOnlyFalse();
 
-        // Allow CSRF cookie to work across Netlify and Render
+        // Allow CSRF cookies across Netlify and Render
         repository.setCookieCustomizer(cookie -> cookie
             .secure(true)
             .sameSite("None")
@@ -63,10 +62,16 @@ public class Security {
 
         return h
 
+            // Enable CORS
             .cors(c -> c.configurationSource(corsConfigurationSource()))
 
-            .csrf(c -> c.csrfTokenRepository(repository))
+            // CSRF protection, except for registration
+            .csrf(c -> c
+                .csrfTokenRepository(repository)
+                .ignoringRequestMatchers("/api/auth/register")
+            )
 
+            // Authorization rules
             .authorizeHttpRequests(a -> a
 
                 // Public frontend routes
@@ -78,7 +83,7 @@ public class Security {
                     "/privacy", "/terms", "/how-it-works"
                 ).permitAll()
 
-                // Public API endpoints
+                // Public API routes
                 .requestMatchers(
                     "/api/auth/csrf",
                     "/api/auth/login",
@@ -89,13 +94,14 @@ public class Security {
                     "/actuator/health"
                 ).permitAll()
 
-                // Admin endpoints
+                // Admin-only routes
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // Everything else requires authentication
+                // Remaining endpoints require authentication
                 .anyRequest().authenticated()
             )
 
+            // Handle unauthorized and forbidden responses
             .exceptionHandling(e -> e
                 .authenticationEntryPoint(
                     (q, r, x) -> r.sendError(401)
