@@ -1,12 +1,19 @@
+
 package com.trustserve;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import java.util.List;
 
 @Configuration
 public class Security {
@@ -17,36 +24,51 @@ public class Security {
     }
 
     @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(
+            List.of("https://trustserve.netlify.app")
+        );
+
+        config.setAllowedMethods(
+            List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        );
+
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        config.setExposedHeaders(List.of("Set-Cookie"));
+
+        UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
+
+    @Bean
     SecurityFilterChain chain(HttpSecurity h) throws Exception {
 
         return h
+            .cors(c -> c.configurationSource(corsConfigurationSource()))
+
             .csrf(c -> c.csrfTokenRepository(
                 CookieCsrfTokenRepository.withHttpOnlyFalse()
             ))
 
             .authorizeHttpRequests(a -> a
 
-                // Public frontend routes
                 .requestMatchers(
                     HttpMethod.GET,
-                    "/",
-                    "/index.html",
-                    "/assets/**",
-                    "/images/**",
-                    "/services/**",
-                    "/book/**",
-                    "/login",
-                    "/register",
-                    "/dashboard",
-                    "/profile",
-                    "/support",
-                    "/about",
-                    "/privacy",
-                    "/terms",
-                    "/how-it-works"
+                    "/", "/index.html", "/assets/**", "/images/**",
+                    "/services/**", "/book/**", "/login", "/register",
+                    "/dashboard", "/profile", "/support", "/about",
+                    "/privacy", "/terms", "/how-it-works"
                 ).permitAll()
 
-                // Public API routes
                 .requestMatchers(
                     "/api/auth/csrf",
                     "/api/auth/login",
@@ -57,10 +79,8 @@ public class Security {
                     "/actuator/health"
                 ).permitAll()
 
-                // Admin-only routes
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // All remaining endpoints require authentication
                 .anyRequest().authenticated()
             )
 
