@@ -19,20 +19,60 @@ import {
 } from "lucide-react";
 import './style.css';
 
-const api=axios.create({baseURL:'https://trustserve-api.onrender.com/api',withCredentials:true,withXSRFToken:false});
-let csrf;
-async function request(method,url,data){
-    if(method!=='get'){
-        csrf=await api.get('/auth/csrf').then(r=>r.data);
-        return api({method,url,data,headers:{[csrf.header]:csrf.token}}).then(r=>r.data)
-    }
-    return api.get(url).then(r=>r.data)
-}
-const get=u=>request('get',u),post=(u,d)=>request('post',u,d);
-const Auth=createContext();
-const money=n=>'₹'+Number(n).toLocaleString('en-IN');
-const icons={'Cleaning':Sparkles,'Plumbing':Wrench,'Electrical':Zap,'AC care':Wind,'Appliances':Refrigerator,'Carpentry':Hammer,'Painting':Paintbrush,'Pest control':Bug,'Maintenance':House,'Computers':Monitor};
+const api = axios.create({
+    baseURL: 'https://trustserve-api.onrender.com/api',
+    withCredentials: true
+});
 
+let csrf;
+
+async function request(method, url, data) {
+    if (method !== 'get') {
+
+        // Login and registration
+        if (url === '/auth/login' || url === '/auth/register') {
+            return api({
+                method,
+                url,
+                data
+            }).then(response => response.data);
+        }
+
+        // CSRF protection for other write requests
+        csrf = await api.get('/auth/csrf').then(response => response.data);
+
+        return api({
+            method,
+            url,
+            data,
+            headers: {
+                [csrf.header]: csrf.token
+            }
+        }).then(response => response.data);
+    }
+
+    return api.get(url).then(response => response.data);
+}
+
+const get = u => request('get', u);
+const post = (u, d) => request('post', u, d);
+
+const Auth = createContext();
+
+const money = n => '₹' + Number(n).toLocaleString('en-IN');
+
+const icons = {
+    'Cleaning': Sparkles,
+    'Plumbing': Wrench,
+    'Electrical': Zap,
+    'AC care': Wind,
+    'Appliances': Refrigerator,
+    'Carpentry': Hammer,
+    'Painting': Paintbrush,
+    'Pest control': Bug,
+    'Maintenance': House,
+    'Computers': Monitor
+};
 function App(){
     const[user,setUser]=useState(null),[ready,setReady]=useState(false);
     useEffect(()=>{
