@@ -24,34 +24,32 @@ const api = axios.create({
     withCredentials: true
 });
 
-let csrf;
+let csrf = null;
+
+// Fetch CSRF token before every state-changing request.
+async function getCsrfToken() {
+    const response = await api.get('/auth/csrf');
+    csrf = response.data;
+    return csrf;
+}
 
 async function request(method, url, data) {
-    if (method !== 'get') {
+    const normalizedMethod = method.toLowerCase();
 
-        // Login and registration
-        if (url === '/auth/login' || url === '/auth/register') {
-            return api({
-                method,
-                url,
-                data
-            }).then(response => response.data);
-        }
-
-        // CSRF protection for other write requests
-        csrf = await api.get('/auth/csrf').then(response => response.data);
-
-        return api({
-            method,
-            url,
-            data,
-            headers: {
-                [csrf.header]: csrf.token
-            }
-        }).then(response => response.data);
+    if (normalizedMethod === 'get') {
+        return api.get(url).then(response => response.data);
     }
 
-    return api.get(url).then(response => response.data);
+    const token = await getCsrfToken();
+
+    return api({
+        method: normalizedMethod,
+        url,
+        data,
+        headers: token?.header && token?.token
+            ? { [token.header]: token.token }
+            : {}
+    }).then(response => response.data);
 }
 
 const get = u => request('get', u);
