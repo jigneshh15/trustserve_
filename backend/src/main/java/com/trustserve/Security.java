@@ -23,6 +23,7 @@ public class Security {
         return new BCryptPasswordEncoder();
     }
 
+    // CORS configuration for Netlify frontend
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
 
@@ -38,7 +39,6 @@ public class Security {
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-
         config.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source =
@@ -52,15 +52,24 @@ public class Security {
     @Bean
     SecurityFilterChain chain(HttpSecurity h) throws Exception {
 
+        CookieCsrfTokenRepository repository =
+            CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+        // Allow CSRF cookie to work across Netlify and Render
+        repository.setCookieCustomizer(cookie -> cookie
+            .secure(true)
+            .sameSite("None")
+        );
+
         return h
+
             .cors(c -> c.configurationSource(corsConfigurationSource()))
 
-            .csrf(c -> c.csrfTokenRepository(
-                CookieCsrfTokenRepository.withHttpOnlyFalse()
-            ))
+            .csrf(c -> c.csrfTokenRepository(repository))
 
             .authorizeHttpRequests(a -> a
 
+                // Public frontend routes
                 .requestMatchers(
                     HttpMethod.GET,
                     "/", "/index.html", "/assets/**", "/images/**",
@@ -69,6 +78,7 @@ public class Security {
                     "/privacy", "/terms", "/how-it-works"
                 ).permitAll()
 
+                // Public API endpoints
                 .requestMatchers(
                     "/api/auth/csrf",
                     "/api/auth/login",
@@ -79,8 +89,10 @@ public class Security {
                     "/actuator/health"
                 ).permitAll()
 
+                // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
 
