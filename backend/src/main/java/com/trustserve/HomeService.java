@@ -1,0 +1,3 @@
+package com.trustserve;
+import jakarta.persistence.*;
+@Entity @Table(name="ts_homeservice") public class HomeService {@Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id; public java.time.Instant createdAt=java.time.Instant.now(); public String name,description,image; @ManyToOne public ServiceCategory category; public int price,duration; public boolean active=true; public String included="Labour and standard tools",excluded="Spare parts and specialist materials",warranty="Report service concerns within 48 hours for review."; }

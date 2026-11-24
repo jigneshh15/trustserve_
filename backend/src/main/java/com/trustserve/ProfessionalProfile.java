@@ -1,0 +1,3 @@
+package com.trustserve;
+import jakarta.persistence.*;
+@Entity @Table(name="ts_professionalprofile") public class ProfessionalProfile {@Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id; public java.time.Instant createdAt=java.time.Instant.now(); @OneToOne public Account account; public String skills="Cleaning",area="Ahmedabad",experience="3 years",verification="Pending Verification",bio="",documentName=""; public boolean available=true; }

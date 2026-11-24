@@ -1,0 +1,3 @@
+package com.trustserve;
+import jakarta.persistence.*;
+@Entity @Table(name="ts_account") public class Account {@Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id; public java.time.Instant createdAt=java.time.Instant.now(); @Column(unique=true,nullable=false) public String email; @com.fasterxml.jackson.annotation.JsonIgnore public String password; public String name,role,phone,address; public boolean active=true; }

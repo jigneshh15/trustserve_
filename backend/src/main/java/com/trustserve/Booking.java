@@ -1,0 +1,3 @@
+package com.trustserve;
+import jakarta.persistence.*;
+@Entity @Table(name="ts_booking") public class Booking {@Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id; public java.time.Instant createdAt=java.time.Instant.now(); @ManyToOne public Account customer; @ManyToOne public ProfessionalProfile professional; @ManyToOne public HomeService service; public String status="Pending",address,instructions,method; public java.time.LocalDate date; public String slot; public int amount; }

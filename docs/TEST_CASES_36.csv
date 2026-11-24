@@ -1,0 +1,37 @@
+ID,Area,Description,Input/Preconditions,Expected Result,Actual Result,Status,Technique
+TC01,Registration,Valid customer registration,"Valid name, email, password, role",Account created; customer role assigned,,Not Run,Functional
+TC02,Registration,Invalid email,Malformed email,Validation error; no account,,Not Run,Negative
+TC03,Registration,Duplicate email,Previously registered email,Duplicate rejected,,Not Run,Negative
+TC04,Registration,Weak password,Password below policy,Password error,,Not Run,Boundary
+TC05,Registration,Attempt public admin role,role=ADMIN,Rejected,,Not Run,Security
+TC06,Login,Valid login,Correct credentials,Authenticated session,,Not Run,Functional
+TC07,Login,Invalid password,Wrong password,Generic error,,Not Run,Negative
+TC08,Logout,Logout,Active session,Session invalidated,,Not Run,Functional
+TC09,Services,Catalogue listing,GET /api/services,Active catalogue returned,,Not Run,Integration
+TC10,Services,Service details,Valid ID,Service details returned,,Not Run,Functional
+TC11,Booking,Future slot booking,"Verified pro, active service, future date",Booking/payment record created,,Not Run,Functional
+TC12,Booking,Past date,Past date,Rejected,,Not Run,Boundary
+TC13,Booking,Invalid slot,Slot not in list,Rejected,,Not Run,Negative
+TC14,Booking,Duplicate slot,Same professional/date/slot,Conflict rejected,,Not Run,Conflict
+TC15,Booking,Short address,Address below minimum,Rejected,,Not Run,Boundary
+TC16,Booking,Unavailable professional,Inactive/unavailable/unverified,Rejected,,Not Run,Negative
+TC17,Booking,Category mismatch,Pro skill mismatch,Rejected,,Not Run,Negative
+TC18,Booking,Payment simulation fails,paymentResult=fail,Booking not created,,Not Run,Negative
+TC19,Booking,Invalid payment method,Unsupported method,Rejected,,Not Run,Negative
+TC20,Status,Professional accepts,Pending booking; owning professional,Status/history updated,,Not Run,Functional
+TC21,Status,Invalid transition,Skip status state,Rejected,,Not Run,Negative
+TC22,Status,Customer cancellation,Eligible owned booking,Cancelled; slot released,,Not Run,Functional
+TC23,Status,Cancel in-progress booking,In Progress,Rejected,,Not Run,Negative
+TC24,Review,Review completed booking,Completed booking; rating 1-5,Review stored,,Not Run,Functional
+TC25,Review,Rating out of range,Rating 0 or 6,Rejected,,Not Run,Boundary
+TC26,Verification,Valid PDF/PNG,Small PDF/PNG,Submission saved,,Not Run,Functional
+TC27,Verification,Invalid upload,Non-PDF/PNG,Rejected,,Not Run,Security
+TC28,Verification,Oversized upload,File >2MB,Rejected,,Not Run,Boundary
+TC29,Admin,Admin verifies pro,"Admin, status, reason",Status/audit updated,,Not Run,Security
+TC30,Admin,Customer accesses admin,Customer session,403 response,,Not Run,Security
+TC31,Security,Protected endpoint without session,No auth,401 response,,Not Run,Security
+TC32,Admin,Suspend user,Admin action,User inactive/audit record,,Not Run,Functional
+TC33,Support,Create ticket,"Logged-in user, subject/message",Ticket created,,Not Run,Functional
+TC34,Support,Resolve ticket,Admin status update,Ticket status/response saved,,Not Run,Functional
+TC35,Performance,Load test,Staging/local controlled load,Latency/errors recorded,,Not Run,Non-functional
+TC36,Usability,User walkthrough,3 consenting participants,Task results/feedback recorded,,Not Run,Non-functional

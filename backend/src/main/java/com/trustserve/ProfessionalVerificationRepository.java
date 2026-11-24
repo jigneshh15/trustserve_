@@ -1,0 +1,1 @@
+package com.trustserve; import org.springframework.data.jpa.repository.JpaRepository; public interface ProfessionalVerificationRepository extends JpaRepository<ProfessionalVerification,Long> {}

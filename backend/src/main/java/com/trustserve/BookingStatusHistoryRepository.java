@@ -1,0 +1,1 @@
+package com.trustserve; import org.springframework.data.jpa.repository.JpaRepository; public interface BookingStatusHistoryRepository extends JpaRepository<BookingStatusHistory,Long> {}
