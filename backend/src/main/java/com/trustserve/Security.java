@@ -1,3 +1,4 @@
+
 package com.trustserve;
 
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,6 @@ public class Security {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS configuration for Netlify frontend
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
 
@@ -37,7 +37,9 @@ public class Security {
         );
 
         config.setAllowedHeaders(List.of("*"));
+
         config.setAllowCredentials(true);
+
         config.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source =
@@ -54,7 +56,6 @@ public class Security {
         CookieCsrfTokenRepository repository =
             CookieCsrfTokenRepository.withHttpOnlyFalse();
 
-        // Allow CSRF cookies across Netlify and Render
         repository.setCookieCustomizer(cookie -> cookie
             .secure(true)
             .sameSite("None")
@@ -62,16 +63,21 @@ public class Security {
 
         return h
 
-            // Enable CORS
-            .cors(c -> c.configurationSource(corsConfigurationSource()))
+            // CORS
+            .cors(c -> c.configurationSource(
+                corsConfigurationSource()
+            ))
 
-            // CSRF protection, except for registration
+            // CSRF protection
             .csrf(c -> c
                 .csrfTokenRepository(repository)
-                .ignoringRequestMatchers("/api/auth/register")
+                .ignoringRequestMatchers(
+                    "/api/auth/register",
+                    "/api/auth/login"
+                )
             )
 
-            // Authorization rules
+            // Authorization
             .authorizeHttpRequests(a -> a
 
                 // Public frontend routes
@@ -94,14 +100,14 @@ public class Security {
                     "/actuator/health"
                 ).permitAll()
 
-                // Admin-only routes
+                // Admin routes
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // Remaining endpoints require authentication
+                // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
 
-            // Handle unauthorized and forbidden responses
+            // Error handling
             .exceptionHandling(e -> e
                 .authenticationEntryPoint(
                     (q, r, x) -> r.sendError(401)
